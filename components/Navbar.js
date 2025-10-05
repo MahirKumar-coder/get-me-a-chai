@@ -45,7 +45,7 @@ const Navbar = () => {
                 </li>
                 <li>
                   {/* ✅ FIX: Using the new usernameSlug for the link */}
-                  <Link href={`/${usernameSlug}`} className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Your Page</Link>
+                  <Link href={`/${session.user.username}`} className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Your Page</Link>
                 </li>
                 <li>
                   <Link onClick={() => signOut()} href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Sign out</Link>
