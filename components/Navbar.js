@@ -10,7 +10,7 @@ const Navbar = () => {
 
   // ✅ FIX: Create a URL-friendly slug from the user's name
   // This will convert "Mahir Kumar" to "mahir-kumar"
-  const usernameSlug = session?.user?.name?.replace(/\s+/g, '-').toLowerCase();
+  const usernameSlug = session?.user?.name?.replace(/\s+/g, '.').toLowerCase();
 
   return (
     <nav className='bg-gray-900 text-white flex justify-between items-center px-4 md:h-16 flex-wrap'>
