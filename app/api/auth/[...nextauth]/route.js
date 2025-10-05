@@ -1,10 +1,9 @@
 import NextAuth from 'next-auth';
 import GitHubProvider from 'next-auth/providers/github';
-import User from '@/models/User'; // User model ko import karein
-import connectDb from '@/db/connectDb'; // DB connection ko import karein
+import User from '@/models/User';
+import connectDb from '@/db/connectDb';
 
 export const authOptions = {
-    debug: true,
     providers: [
         GitHubProvider({
             clientId: process.env.GITHUB_ID,
@@ -12,39 +11,48 @@ export const authOptions = {
         }),
     ],
     callbacks: {
-        async signIn({ user, account, profile, email, credentials }) {
-            if (account.provider == 'github') {
-                await connectDb()
-                // Check if user already exists in the database
-                const currentUser = await User.findOne({ email: email }).lean()
+        // ✅ STEP 1: SIGN IN - User create karne ke liye
+        async signIn({ user, account, profile }) {
+            if (account.provider === 'github') {
+                await connectDb();
+                // Check if user exists
+                const currentUser = await User.findOne({ email: user.email });
                 if (!currentUser) {
-                    // If not, create a new user
-                    await User.create({
+                    // Create a new user if they don't exist
+                    const newUser = await User.create({
                         email: user.email,
-                        username: user.email.split("@")[0]
-                    })
+                        username: user.email.split("@")[0].replace(/[^a-zA-Z0-9]/g, ''), // Make username URL-friendly
+                        name: user.name,
+                        profilepic: user.image,
+                    });
                 }
-                return true
             }
+            return true;
         },
 
-        async session({ session }) {
-            // Database se user ka latest data fetch karein
-            const dbUser = await User.findOne({ email: session.user.email }).lean();
-            
-            if (dbUser) { // Ensure user exists
-                // ✅ THE FIX: Sirf zaroori aur plain data session mein add karein
-                session.user.username = dbUser.username;
-                session.user._id = dbUser._id.toString(); // _id ko string mein convert karein
-                
-                // Aap aur bhi cheezein add kar sakte hain:
-                // session.user.razorpayid = dbUser.razorpayid;
+        // ✅ STEP 2: JWT - Token mein extra data daalne ke liye
+        async jwt({ token, user }) {
+            // Login ke baad, user object milta hai
+            if (user) {
+                await connectDb();
+                const dbUser = await User.findOne({ email: user.email });
+                if (dbUser) {
+                    token.username = dbUser.username;
+                }
             }
-            
-            return session; // Saaf kiya hua session return karein
+            return token;
+        },
+        
+        // ✅ STEP 3: SESSION - Client ko token se data dene ke liye
+        async session({ session, token }) {
+            if (session.user) {
+                // Token se username nikal kar session mein daalo
+                session.user.username = token.username;
+            }
+            return session;
         },
     },
-    // adapter: MongoDBAdapter(clientPromise), // <-- Aapke paas aisi line kahin aur configure hogi
+    // Aapne adapter comment kiya hua hai, isliye hum callbacks use kar rahe hain
 };
 
 const handler = NextAuth(authOptions);
