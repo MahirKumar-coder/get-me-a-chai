@@ -8,8 +8,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Bounce } from 'react-toastify'
 import { useRouter } from 'next/navigation'
-
-import { notFound } from "next/navigation"
+import Image from 'next/image'
 
 const PaymentPage = ({ username }) => {
     const { data: session } = useSession()
@@ -151,7 +150,7 @@ const PaymentPage = ({ username }) => {
 
             <div className='cover w-full relative'>
                 {currentUser.coverpic ? (
-                    <img
+                    <Image
                         className='object-cover w-full h-48 md:h-[500px]'
                         src={currentUser.coverpic}
                         alt="Cover"
@@ -166,7 +165,7 @@ const PaymentPage = ({ username }) => {
 
                 <div className='absolute -bottom-20 right-[38%] md:right-[46%] border-white border-2 rounded-full size-32'>
                     {currentUser.profilepic ? (
-                        <img
+                        <Image
                             className='rounded-full object-cover size-32'
                             width={128}
                             height={128}
@@ -200,7 +199,7 @@ const PaymentPage = ({ username }) => {
                             {Array.isArray(payments) && payments.length > 0 ? (
                                 payments.map((p, i) => (
                                     <li key={i} className='my-3 flex gap-2 items-center'>
-                                        <img src='users.gif' className='w-15' />
+                                        <Image src='users.gif' className='w-15' />
                                         {p.name} donated ₹{p.amount} with message {p.message}
                                     </li>
                                 ))
